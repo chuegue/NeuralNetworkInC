@@ -1,7 +1,7 @@
 PROJECT_NAME = runner
 
 CC = gcc
-CFLAGS = -Wall -pedantic -std=c99 -O3 
+CFLAGS = -g#-Wall -pedantic -std=c99 -O3 
 OBJECTS = Matrix.o NeuralNetwork.o main.o
 
 all: $(PROJECT_NAME)

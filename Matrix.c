@@ -225,6 +225,19 @@ Matrix *Inverse(Matrix *input)
     return a;
 }
 
+// returns matrix a with all its entries as the result of function func
+Matrix *ApplyFunc_ElementWise_Matrix(Matrix *a, float func(float))
+{
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
+            a->data[i][j] = func(a->data[i][j]);
+        }
+    }
+    return a;
+}
+
 void Print_Matrix(Matrix *a)
 {
     for (int i = 0; i < a->rows; i++)
@@ -238,6 +251,19 @@ void Print_Matrix(Matrix *a)
         printf("\n");
     }
     printf("\n");
+}
+
+// a = dest, b = source
+void CopyContents_Matrix(Matrix *a, Matrix *b)
+{
+    assert(a->cols == b->cols && a->rows == b->rows);
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
+            a->data[i][j] = b->data[i][j];
+        }
+    }
 }
 
 void Free_Matrix(Matrix *a)

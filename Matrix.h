@@ -18,6 +18,8 @@ Matrix *Subtraction(Matrix *a, Matrix *b);
 Matrix *Transpose(Matrix *a);
 double Determinant(Matrix *a);
 Matrix *Inverse(Matrix *input);
+Matrix *ApplyFunc_ElementWise_Matrix(Matrix *a, float func(float));
+void CopyContents_Matrix(Matrix *a, Matrix *b);
 void Print_Matrix(Matrix *a);
 void Free_Matrix(Matrix *a);
 

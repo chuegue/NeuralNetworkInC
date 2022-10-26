@@ -9,14 +9,10 @@ typedef struct
     Matrix **V;
     Matrix **W;
     Matrix **b;
-    // int *n_inputs;
-    // int *n_outputs;
-    // int n_hidden_layers;
-    // int *n_nodes_hidden_layer;
-    // int n_weights;
-    // Matrix **weights;
-    // int n_biases;
-    // Matrix **biases;
 } NeuralNetwork;
+
+NeuralNetwork *Init_NN(int n_layers, int *size_layers, float gen_func(int, int));
+NeuralNetwork *Forward_Propagation(NeuralNetwork *NN, float *inputs, int inputs_size, float hidden_activation_fun(float), float output_activation_fun(float));
+void Free_NN(NeuralNetwork *NN);
 
 #endif
