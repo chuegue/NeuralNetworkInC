@@ -42,15 +42,19 @@ NeuralNetwork *Forward_Propagation(NeuralNetwork *NN, float *inputs, int inputs_
         Matrix *WTranspose = Transpose(NN->W[i - 1]);
         Matrix *WTV = Multiply(WTranspose, NN->V[i - 1]);
         Matrix *Z = Addition(WTV, NN->b[i - 1]);
-        Matrix *Z1;
+        Matrix *V;
         CopyContents_Matrix(NN->Z[i], Z);
         if (i != NN->n_layers - 1)
-            Z1 = ApplyFunc_ElementWise_Matrix(Z, hidden_activation_fun);
+        {
+            V = ApplyFunc_ElementWise_Matrix(Z, hidden_activation_fun);
+        }
         else
-            Z1 = ApplyFunc_ElementWise_Matrix(Z, output_activation_fun);
-        CopyContents_Matrix(NN->V[i], Z1);
+        {
+            V = ApplyFunc_ElementWise_Matrix(Z, output_activation_fun);
+        }
+        CopyContents_Matrix(NN->V[i], V);
         Free_Matrix(Z);
-        Free_Matrix(Z1);
+        Free_Matrix(V);
         Free_Matrix(WTV);
         Free_Matrix(WTranspose);
     }
@@ -62,7 +66,7 @@ float zeros(int a, int b)
     return (float)0;
 }
 
-NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int outputs_size, float alpha, float ddx_output(float a), float ddx_hidden(float a))
+NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int outputs_size, float alpha, float ddx_hidden(float a), float ddx_output(float a))
 {
     //   dE/dW = (dE/dV)(dV/dZ)(dZ/dW)
     assert(outputs_size == NN->size_layers[NN->n_layers - 1]);
@@ -72,7 +76,7 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
         expected_outputs_matrix->data[i][0] = expected_outputs[i];
     }
     Matrix *VminusY = Subtraction(NN->V[NN->n_layers - 1], expected_outputs_matrix);
-    Matrix *VminusY2 = EntryWise_Multiply(VminusY, VminusY); 
+    // Matrix *VminusY2 = EntryWise_Multiply(VminusY, VminusY);
     Matrix *dvdz = ApplyFunc_ElementWise_Matrix(NN->Z[NN->n_layers - 1], ddx_output);
     Matrix *VT = Transpose(NN->V[NN->n_layers - 2]);
     Matrix *DELTA = EntryWise_Multiply(VminusY, dvdz);
@@ -86,7 +90,7 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
     CopyContents_Matrix(NN->b[NN->n_layers - 2], delta_b);
     Free_Matrix(expected_outputs_matrix);
     Free_Matrix(VminusY);
-    Free_Matrix(VminusY2);
+    // Free_Matrix(VminusY2);
     Free_Matrix(dvdz);
     Free_Matrix(VT);
     Free_Matrix(DELTA);
