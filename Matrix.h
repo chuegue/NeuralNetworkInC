@@ -11,9 +11,9 @@ typedef struct
 Matrix *Init_Matrix(int rows, int cols, float gen_func(int, int));
 Matrix *EntryWise_Multiply(Matrix *a, Matrix *b);
 Matrix *Multiply(Matrix *a, Matrix *b);
-Matrix *Scalar_Multiply(Matrix *a, int m);
+Matrix *Scalar_Multiply(Matrix *a, float m);
 Matrix *Addition(Matrix *a, Matrix *b);
-Matrix *Scalar_Addition(Matrix *a, int m);
+Matrix *Scalar_Addition(Matrix *a, float m);
 Matrix *Subtraction(Matrix *a, Matrix *b);
 Matrix *Transpose(Matrix *a);
 double Determinant(Matrix *a);

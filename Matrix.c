@@ -59,14 +59,14 @@ Matrix *EntryWise_Multiply(Matrix *a, Matrix *b)
     {
         for (int j = 0; j < b->cols; j++)
         {
-            result->data[i][j] += a->data[i][j] * b->data[i][j];
+            result->data[i][j] = a->data[i][j] * b->data[i][j];
         }
     }
     return result;
 }
 
 // given a matrix and a scalar m returns a matrix where each element is multiplied by the scalar
-Matrix *Scalar_Multiply(Matrix *a, int m)
+Matrix *Scalar_Multiply(Matrix *a, float m)
 {
     Matrix *result = Init_Matrix(a->rows, a->cols, zero);
     for (int i = 0; i < a->rows; i++)
@@ -95,7 +95,7 @@ Matrix *Addition(Matrix *a, Matrix *b)
 }
 
 // given a matrix and a scalar m returns a matrix where each element is added by the scalar
-Matrix *Scalar_Addition(Matrix *a, int m)
+Matrix *Scalar_Addition(Matrix *a, float m)
 {
     Matrix *result = Init_Matrix(a->rows, a->cols, zero);
     for (int i = 0; i < a->rows; i++)
@@ -225,17 +225,18 @@ Matrix *Inverse(Matrix *input)
     return a;
 }
 
-// returns matrix a with all its entries as the result of function func
+// returns a matrix with all its entries as the result of function func
 Matrix *ApplyFunc_ElementWise_Matrix(Matrix *a, float func(float))
 {
+    Matrix *result = Init_Matrix(a->rows, a->cols, zero);
     for (int i = 0; i < a->rows; i++)
     {
         for (int j = 0; j < a->cols; j++)
         {
-            a->data[i][j] = func(a->data[i][j]);
+            result->data[i][j] = func(a->data[i][j]);
         }
     }
-    return a;
+    return result;
 }
 
 void Print_Matrix(Matrix *a)
