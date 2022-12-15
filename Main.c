@@ -22,12 +22,12 @@ float ReLU_prime(float a)
 
 float leaky_ReLU(float a)
 {
-    return (a > 0 ? a : 0.01 * a);
+    return (a > 0 ? a : 0.001 * a);
 }
 
 float leaky_ReLU_prime(float a)
 {
-    return (a > 0 ? 1 : 0.01);
+    return (a > 0 ? 1 : 0.001);
 }
 
 float sigmoid(float a)
@@ -54,29 +54,21 @@ int main(int argc, char **argv)
 {
     srand(time(NULL));
     float inputs[] = {1};
-    float outputs[] = {20};
-    int sizelayers[] = {sizeof(inputs) / sizeof(inputs[0]), 1, sizeof(outputs) / sizeof(outputs[0])};
+    float outputs[] = {1};
+    int sizelayers[] = {sizeof(inputs) / sizeof(inputs[0]), 3,3, sizeof(outputs) / sizeof(outputs[0])};
     NeuralNetwork *nn = Init_NN(sizeof(sizelayers) / sizeof(sizelayers[0]), sizelayers, gen);
     // Print_NN(nn);
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 1000; i++)
     {
         for (int j = 0; j < sizeof(inputs) / sizeof(inputs[0]); j++)
         {
             inputs[j] = 10.0 * rand() / RAND_MAX;
             outputs[j] = 20.0 * inputs[j];
-            if (0)
-            {
-                printf("Inputs in train %i: %f\n", i + 1, inputs[j]);
-                printf("Expected outputs in train %i: %f\n", i + 1, outputs[j]);
-            }
-        }
-        if (0)
-        {
-            printf("\n");
         }
         nn = Forward_Propagation(nn, inputs, sizeof(inputs) / sizeof(inputs[0]), ReLU, linear);
+        // Print_NN(nn);
 
-        nn = Back_Propagation(nn, outputs, sizeof(outputs) / sizeof(outputs[0]), 0.05, ReLU_prime, linear_prime);
+        nn = Back_Propagation(nn, outputs, sizeof(outputs) / sizeof(outputs[0]), 0.001, ReLU_prime, linear_prime);
     }
 
     // Print_NN(nn);

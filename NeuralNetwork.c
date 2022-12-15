@@ -77,7 +77,7 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
     }
     int n_layers = NN->n_layers;
     // update the first weights and biases
-    Matrix *dEdV = Subtraction(expected_outputs_matrix, NN->V[n_layers - 1]);
+    Matrix *dEdV = Subtraction(NN->V[n_layers - 1], expected_outputs_matrix);
     Matrix *dVdZ = ApplyFunc_ElementWise_Matrix(NN->Z[n_layers - 1], ddx_output);
     Matrix *delta = EntryWise_Multiply(dEdV, dVdZ);
     Free_Matrix(dEdV);
@@ -90,6 +90,8 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
     Matrix *alpha_dEdW_T = Transpose(alpha_dEdW);
     Free_Matrix(alpha_dEdW);
     Matrix *alpha_dEdb = Scalar_Multiply(delta, alpha);
+    Matrix *oldW = Init_Matrix(NN->W[n_layers - 2]->rows, NN->W[n_layers - 2]->cols, zeros);
+    CopyContents_Matrix(oldW, NN->W[n_layers - 2]);
     Matrix *updated_W = Subtraction(NN->W[n_layers - 2], alpha_dEdW_T), *updated_b = Subtraction(NN->b[n_layers - 2], alpha_dEdb);
     CopyContents_Matrix(NN->W[n_layers - 2], updated_W);
     CopyContents_Matrix(NN->b[n_layers - 2], updated_b);
@@ -101,7 +103,8 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
     Matrix *w_times_old_delta, *f_prime_z;
     for (int i = 0; i < n_layers - 2; i++)
     {
-        w_times_old_delta = Multiply(NN->W[n_layers - 2 - i], delta);
+        w_times_old_delta = Multiply(oldW, delta);
+        Free_Matrix(oldW);
         f_prime_z = ApplyFunc_ElementWise_Matrix(NN->Z[n_layers - 2 - i], ddx_hidden);
         delta = EntryWise_Multiply(w_times_old_delta, f_prime_z);
         Free_Matrix(f_prime_z);
@@ -114,6 +117,8 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
         alpha_dEdW_T = Transpose(alpha_dEdW);
         Free_Matrix(alpha_dEdW);
         alpha_dEdb = Scalar_Multiply(delta, alpha);
+        oldW = Init_Matrix(NN->W[n_layers - 3 - i]->rows,NN->W[n_layers - 3 - i]->cols,zeros);
+        CopyContents_Matrix(oldW, NN->W[n_layers - 3 - i]);
         updated_W = Subtraction(NN->W[n_layers - 3 - i], alpha_dEdW_T);
         Free_Matrix(alpha_dEdW_T);
         updated_b = Subtraction(NN->b[n_layers - 3 - i], alpha_dEdb);
@@ -124,6 +129,7 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
         Free_Matrix(updated_b);
     }
     Free_Matrix(delta);
+    Free_Matrix(oldW);
     Free_Matrix(expected_outputs_matrix);
     return NN;
 }
