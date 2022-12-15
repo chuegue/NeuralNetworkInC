@@ -57,7 +57,7 @@ Matrix *EntryWise_Multiply(Matrix *a, Matrix *b)
     Matrix *result = Init_Matrix(a->rows, a->cols, zero);
     for (int i = 0; i < a->rows; i++)
     {
-        for (int j = 0; j < b->cols; j++)
+        for (int j = 0; j < a->cols; j++)
         {
             result->data[i][j] = a->data[i][j] * b->data[i][j];
         }
@@ -257,12 +257,26 @@ void Print_Matrix(Matrix *a)
 // a = dest, b = source
 void CopyContents_Matrix(Matrix *a, Matrix *b)
 {
-    assert(a->cols == b->cols && a->rows == b->rows);
-    for (int i = 0; i < a->rows; i++)
+    if (a->cols == b->cols && a->rows == b->rows)
     {
-        for (int j = 0; j < a->cols; j++)
+        for (int i = 0; i < a->rows; i++)
         {
-            a->data[i][j] = b->data[i][j];
+            for (int j = 0; j < a->cols; j++)
+            {
+                a->data[i][j] = b->data[i][j];
+            }
+        }
+    }
+    else
+    {
+        Free_Matrix(a);
+        a = Init_Matrix(b->rows, b->cols, zero);
+        for (int i = 0; i < b->rows; i++)
+        {
+            for (int j = 0; j < b->cols; j++)
+            {
+                a->data[i][j] = b->data[i][j];
+            }
         }
     }
 }

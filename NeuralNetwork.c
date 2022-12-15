@@ -46,11 +46,11 @@ NeuralNetwork *Forward_Propagation(NeuralNetwork *NN, float *inputs, int inputs_
         CopyContents_Matrix(NN->Z[i], Z);
         if (i != NN->n_layers - 1)
         {
-            V = ApplyFunc_ElementWise_Matrix(Z, hidden_activation_fun);
+            V = ApplyFunc_ElementWise_Matrix(NN->Z[i], hidden_activation_fun);
         }
         else
         {
-            V = ApplyFunc_ElementWise_Matrix(Z, output_activation_fun);
+            V = ApplyFunc_ElementWise_Matrix(NN->Z[i], output_activation_fun);
         }
         CopyContents_Matrix(NN->V[i], V);
         Free_Matrix(Z);
@@ -75,31 +75,56 @@ NeuralNetwork *Back_Propagation(NeuralNetwork *NN, float *expected_outputs, int 
     {
         expected_outputs_matrix->data[i][0] = expected_outputs[i];
     }
-    Matrix *VminusY = Subtraction(NN->V[NN->n_layers - 1], expected_outputs_matrix);
-    // Matrix *VminusY2 = EntryWise_Multiply(VminusY, VminusY);
-    Matrix *dvdz = ApplyFunc_ElementWise_Matrix(NN->Z[NN->n_layers - 1], ddx_output);
-    Matrix *VT = Transpose(NN->V[NN->n_layers - 2]);
-    Matrix *DELTA = EntryWise_Multiply(VminusY, dvdz);
-    Matrix *dEdW = Multiply(DELTA, VT);
-    Matrix *alpha_dEdW = Scalar_Multiply(dEdW, alpha);
-    Matrix *alpha_dEdW_T = Transpose(alpha_dEdW);
-    Matrix *delta_w = Subtraction(NN->W[NN->n_layers - 2], alpha_dEdW_T);
-    CopyContents_Matrix(NN->W[NN->n_layers - 2], delta_w);
-    Matrix *alpha_dEdb = Scalar_Multiply(DELTA, alpha);
-    Matrix *delta_b = Subtraction(NN->b[NN->n_layers - 2], alpha_dEdb);
-    CopyContents_Matrix(NN->b[NN->n_layers - 2], delta_b);
-    Free_Matrix(expected_outputs_matrix);
-    Free_Matrix(VminusY);
-    // Free_Matrix(VminusY2);
-    Free_Matrix(dvdz);
+    int n_layers = NN->n_layers;
+    // update the first weights and biases
+    Matrix *dEdV = Subtraction(expected_outputs_matrix, NN->V[n_layers - 1]);
+    Matrix *dVdZ = ApplyFunc_ElementWise_Matrix(NN->Z[n_layers - 1], ddx_output);
+    Matrix *delta = EntryWise_Multiply(dEdV, dVdZ);
+    Free_Matrix(dEdV);
+    Free_Matrix(dVdZ);
+    Matrix *VT = Transpose(NN->V[n_layers - 2]);
+    Matrix *dEdW = Multiply(delta, VT);
     Free_Matrix(VT);
-    Free_Matrix(DELTA);
+    Matrix *alpha_dEdW = Scalar_Multiply(dEdW, alpha);
     Free_Matrix(dEdW);
-    Free_Matrix(alpha_dEdb);
+    Matrix *alpha_dEdW_T = Transpose(alpha_dEdW);
     Free_Matrix(alpha_dEdW);
+    Matrix *alpha_dEdb = Scalar_Multiply(delta, alpha);
+    Matrix *updated_W = Subtraction(NN->W[n_layers - 2], alpha_dEdW_T), *updated_b = Subtraction(NN->b[n_layers - 2], alpha_dEdb);
+    CopyContents_Matrix(NN->W[n_layers - 2], updated_W);
+    CopyContents_Matrix(NN->b[n_layers - 2], updated_b);
     Free_Matrix(alpha_dEdW_T);
-    Free_Matrix(delta_w);
-    Free_Matrix(delta_b);
+    Free_Matrix(alpha_dEdb);
+    Free_Matrix(updated_W);
+    Free_Matrix(updated_b);
+    // rest of backpropagation
+    Matrix *w_times_old_delta, *f_prime_z;
+    for (int i = 0; i < n_layers - 2; i++)
+    {
+        w_times_old_delta = Multiply(NN->W[n_layers - 2 - i], delta);
+        f_prime_z = ApplyFunc_ElementWise_Matrix(NN->Z[n_layers - 2 - i], ddx_hidden);
+        delta = EntryWise_Multiply(w_times_old_delta, f_prime_z);
+        Free_Matrix(f_prime_z);
+        Free_Matrix(w_times_old_delta);
+        VT = Transpose(NN->V[n_layers - 3 - i]);
+        dEdW = Multiply(delta, VT);
+        Free_Matrix(VT);
+        alpha_dEdW = Scalar_Multiply(dEdW, alpha);
+        Free_Matrix(dEdW);
+        alpha_dEdW_T = Transpose(alpha_dEdW);
+        Free_Matrix(alpha_dEdW);
+        alpha_dEdb = Scalar_Multiply(delta, alpha);
+        updated_W = Subtraction(NN->W[n_layers - 3 - i], alpha_dEdW_T);
+        Free_Matrix(alpha_dEdW_T);
+        updated_b = Subtraction(NN->b[n_layers - 3 - i], alpha_dEdb);
+        Free_Matrix(alpha_dEdb);
+        CopyContents_Matrix(NN->W[n_layers - 3 - i], updated_W);
+        CopyContents_Matrix(NN->b[n_layers - 3 - i], updated_b);
+        Free_Matrix(updated_W);
+        Free_Matrix(updated_b);
+    }
+    Free_Matrix(delta);
+    Free_Matrix(expected_outputs_matrix);
     return NN;
 }
 
